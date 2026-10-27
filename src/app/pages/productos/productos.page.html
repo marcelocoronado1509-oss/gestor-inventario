@@ -1,0 +1,208 @@
+
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Gestión de inventario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="contenedor">
+    <h1>Productos</h1>
+
+    <p>
+      Consulta y administra los productos de tu inventario.
+    </p>
+
+    <!-- Formulario visible solo para administradores -->
+    <ion-card *ngIf="esAdmin">
+      <ion-card-header>
+        <ion-card-title>
+          {{ editandoId !== null ? 'Editar producto' : 'Añadir producto' }}
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form (ngSubmit)="guardarProducto()">
+          <ion-item>
+            <ion-input
+              label="Nombre del producto"
+              labelPlacement="stacked"
+              name="nombre"
+              [(ngModel)]="formulario.nombre"
+              placeholder="Ej. Teclado mecánico"
+              required
+              maxlength="100">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Categoría"
+              labelPlacement="stacked"
+              name="categoriaFormulario"
+              [(ngModel)]="formulario.categoria"
+              placeholder="Ej. Periféricos"
+              required
+              maxlength="60">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Cantidad"
+              labelPlacement="stacked"
+              name="cantidad"
+              type="number"
+              [(ngModel)]="formulario.cantidad"
+              min="0"
+              step="1"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Precio (€)"
+              labelPlacement="stacked"
+              name="precio"
+              type="number"
+              [(ngModel)]="formulario.precio"
+              min="0"
+              step="0.01"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <div class="acciones-formulario">
+            <ion-button expand="block" type="submit">
+              {{ editandoId !== null ? 'Guardar cambios' : 'Añadir producto' }}
+            </ion-button>
+
+            <ion-button
+              *ngIf="editandoId !== null"
+              expand="block"
+              fill="outline"
+              color="medium"
+              type="button"
+              (click)="cancelarEdicion()">
+              Cancelar edición
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Mensajes accesibles -->
+    <ion-text
+      *ngIf="mensaje"
+      [color]="mensaje.includes('No tienes permisos') || mensaje.includes('Revisa') ? 'danger' : 'success'"
+      role="status"
+      aria-live="polite">
+      <p>{{ mensaje }}</p>
+    </ion-text>
+
+    <!-- Aviso de permisos -->
+    <ion-card *ngIf="!esAdmin">
+      <ion-card-content>
+        Estás en modo consulta. Puedes ver, buscar y filtrar productos,
+        pero no añadirlos, editarlos ni eliminarlos.
+      </ion-card-content>
+    </ion-card>
+
+    <section aria-labelledby="titulo-listado">
+      <h2 id="titulo-listado">
+        Listado de productos ({{ productosFiltrados.length }})
+      </h2>
+
+      <ion-card color="warning" *ngIf="productosConStockBajo > 0">
+        <ion-card-content>
+          Atención: hay {{ productosConStockBajo }}
+          productos con 5 unidades o menos.
+        </ion-card-content>
+      </ion-card>
+
+      <ion-item>
+        <ion-input
+          label="Buscar producto"
+          labelPlacement="stacked"
+          name="busqueda"
+          [(ngModel)]="busqueda"
+          placeholder="Escribe el nombre del producto"
+          clearInput>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Filtrar por categoría"
+          [(ngModel)]="categoriaSeleccionada"
+          name="categoriaFiltro"
+          interface="popover"
+          placeholder="Selecciona una categoría">
+          <ion-select-option
+            *ngFor="let categoria of categorias"
+            [value]="categoria">
+            {{ categoria }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-card *ngIf="productosFiltrados.length === 0">
+        <ion-card-content>
+          No se han encontrado productos con esos criterios.
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card *ngFor="let producto of productosFiltrados">
+        <ion-card-header>
+          <ion-card-title>
+            {{ producto.nombre }}
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p>
+            <strong>Categoría:</strong>
+            {{ producto.categoria }}
+          </p>
+
+          <p>
+            <strong>Cantidad:</strong>
+            {{ producto.cantidad }} unidades
+          </p>
+
+          <p>
+            <strong>Precio:</strong>
+            {{ producto.precio | currency:'EUR':'symbol':'1.2-2' }}
+          </p>
+
+          <ion-text
+            *ngIf="producto.cantidad <= 5"
+            color="danger">
+            <p><strong>Stock bajo</strong></p>
+          </ion-text>
+
+          <!-- Acciones visibles solo para administradores -->
+          <div class="acciones-producto" *ngIf="esAdmin">
+            <ion-button
+              size="small"
+              fill="outline"
+              (click)="editarProducto(producto)"
+              [attr.aria-label]="'Editar ' + producto.nombre">
+              Editar
+            </ion-button>
+
+            <ion-button
+              size="small"
+              color="danger"
+              fill="outline"
+              (click)="eliminarProducto(producto)"
+              [attr.aria-label]="'Eliminar ' + producto.nombre">
+              Eliminar
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </section>
+  </main>
+</ion-content>

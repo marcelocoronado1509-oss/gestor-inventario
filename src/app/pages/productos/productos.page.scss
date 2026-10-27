@@ -1,0 +1,38 @@
+
+.contenedor {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1,
+h2 {
+  margin-top: 20px;
+}
+
+.acciones-formulario,
+.acciones-producto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.acciones-producto ion-button {
+  margin-inline-start: 0;
+}
+
+ion-card {
+  margin-inline: 0;
+}
+
+@media (max-width: 480px) {
+  .acciones-formulario,
+  .acciones-producto {
+    flex-direction: column;
+  }
+
+  .acciones-producto ion-button {
+    width: 100%;
+    margin-inline: 0;
+  }
+}

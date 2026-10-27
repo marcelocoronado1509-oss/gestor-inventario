@@ -1,0 +1,14 @@
+
+.grafico {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 320px;
+  margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+  .grafico {
+    height: 280px;
+  }
+}

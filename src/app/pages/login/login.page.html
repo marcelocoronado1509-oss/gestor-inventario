@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Gestor de Inventario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="login-container">
+    <h1>Iniciar sesión</h1>
+    <p>Accede a la gestión del inventario.</p>
+
+    <form (ngSubmit)="submit()" #loginForm="ngForm">
+      <ion-item>
+        <ion-input label="Correo electrónico" labelPlacement="stacked" type="email" name="email" [(ngModel)]="email"
+          required email>
+        </ion-input>
+
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Contraseña" labelPlacement="stacked" type="password" name="password" [(ngModel)]="password"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-text color="danger" *ngIf="error" role="alert">
+        <p>{{ error }}</p>
+      </ion-text>
+
+      <ion-button expand="block" type="submit" [disabled]="loading || loginForm.invalid">
+        {{ loading ? 'Entrando...' : 'Entrar' }}
+      </ion-button>
+    </form>
+
+    <section aria-label="Credenciales de prueba">
+      <h2>Usuarios de prueba</h2>
+      <p>Administrador: admin@inventario.com</p>
+      <p>Contraseña: Admin123!</p>
+      <p>Usuario: usuario@inventario.com</p>
+      <p>Contraseña: Usuario123!</p>
+    </section>
+  </main>
+</ion-content>

@@ -1,0 +1,118 @@
+
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Panel de administración</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="dashboard-container">
+    <h1>Resumen del inventario</h1>
+    <p>Consulta el estado general de tus productos.</p>
+
+    <section class="resumen" aria-label="Resumen del inventario">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Total de productos</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p class="numero">{{ productos.length }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Unidades en inventario</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p class="numero">{{ totalUnidades }}</p>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Unidades por categoría</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p *ngIf="categoriasLabels.length === 0">
+          No hay productos para representar en el gráfico.
+        </p>
+
+        <div
+          class="grafico"
+          *ngIf="categoriasLabels.length > 0">
+
+          <canvas
+            baseChart
+            [type]="doughnutChartType"
+            [data]="{
+              labels: categoriasLabels,
+              datasets: [{
+                data: categoriasDatos,
+                label: 'Unidades',
+                backgroundColor: [
+                  '#3880ff',
+                  '#2dd36f',
+                  '#ffc409',
+                  '#eb445a',
+                  '#92949c',
+                  '#5260ff',
+                  '#2fdf75'
+                ],
+                hoverOffset: 8,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+              }]
+            }"
+            [options]="doughnutChartOptions"
+            role="img"
+            aria-label="Gráfico circular tipo dona que muestra las unidades de inventario por categoría">
+          </canvas>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Productos registrados</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p *ngIf="productos.length === 0">
+          Todavía no hay productos registrados.
+        </p>
+
+        <ion-card *ngFor="let producto of productos">
+          <ion-card-header>
+            <ion-card-title>{{ producto.nombre }}</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <p>Categoría: {{ producto.categoria }}</p>
+            <p>Unidades: {{ producto.cantidad }}</p>
+            <p>
+              Precio:
+              {{ producto.precio | currency:'EUR':'symbol':'1.2-2' }}
+            </p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-button expand="block" (click)="abrirProductos()">
+          Gestionar productos
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="medium"
+          (click)="cerrarSesion()">
+          Cerrar sesión
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>
