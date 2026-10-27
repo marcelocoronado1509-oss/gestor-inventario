@@ -1,43 +1,111 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Gestor de Inventario</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-content class="ion-padding">
-  <main class="login-container">
-    <h1>Iniciar sesión</h1>
-    <p>Accede a la gestión del inventario.</p>
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-background">
+    <main class="login-container">
 
-    <form (ngSubmit)="submit()" #loginForm="ngForm">
-      <ion-item>
-        <ion-input label="Correo electrónico" labelPlacement="stacked" type="email" name="email" [(ngModel)]="email"
-          required email>
-        </ion-input>
+      <header class="brand">
+        <div class="brand-icon">
+          <ion-icon name="cube-outline"></ion-icon>
+        </div>
+        <h1>Gestor de Inventario</h1>
+        <p>Gestiona tus productos de forma sencilla</p>
+      </header>
 
-      </ion-item>
+      <section class="login-card">
+        <div class="card-heading">
+          <h2>Iniciar sesión</h2>
+          <p>Introduce tus credenciales para continuar.</p>
+        </div>
 
-      <ion-item>
-        <ion-input label="Contraseña" labelPlacement="stacked" type="password" name="password" [(ngModel)]="password"
-          required>
-        </ion-input>
-      </ion-item>
+        <form #loginForm="ngForm" (ngSubmit)="iniciarSesion()">
+          <div class="field-group">
+            <ion-input
+              label="Correo electrónico"
+              labelPlacement="stacked"
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              autocomplete="username"
+              placeholder="nombre@ejemplo.com"
+              required>
+            </ion-input>
+          </div>
 
-      <ion-text color="danger" *ngIf="error" role="alert">
-        <p>{{ error }}</p>
-      </ion-text>
+          <div class="field-group">
+            <ion-input
+              label="Contraseña"
+              labelPlacement="stacked"
+              type="password"
+              name="password"
+              [(ngModel)]="password"
+              autocomplete="current-password"
+              placeholder="Introduce tu contraseña"
+              required>
+            </ion-input>
+          </div>
 
-      <ion-button expand="block" type="submit" [disabled]="loading || loginForm.invalid">
-        {{ loading ? 'Entrando...' : 'Entrar' }}
-      </ion-button>
-    </form>
+          <div class="error-message" *ngIf="mensaje" role="alert">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ mensaje }}</span>
+          </div>
 
-    <section aria-label="Credenciales de prueba">
-      <h2>Usuarios de prueba</h2>
-      <p>Administrador: admin@inventario.com</p>
-      <p>Contraseña: Admin123!</p>
-      <p>Usuario: usuario@inventario.com</p>
-      <p>Contraseña: Usuario123!</p>
-    </section>
-  </main>
+          <ion-button
+            class="login-button"
+            expand="block"
+            type="submit"
+            [disabled]="cargando || loginForm.invalid">
+
+            <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+            <span *ngIf="!cargando">Entrar</span>
+          </ion-button>
+        </form>
+
+        <div class="security-note">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Acceso al sistema de inventario
+        </div>
+      </section>
+
+      <section class="test-users">
+        <h3>Usuarios de prueba</h3>
+
+        <button
+          type="button"
+          class="user-option"
+          (click)="usarUsuarioPrueba('admin')">
+          <span class="user-avatar admin-avatar">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+          </span>
+          <span class="user-details">
+            <strong>Administrador</strong>
+            <small>admin@inventario.com</small>
+          </span>
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+
+        <button
+          type="button"
+          class="user-option"
+          (click)="usarUsuarioPrueba('user')">
+          <span class="user-avatar">
+            <ion-icon name="person-outline"></ion-icon>
+          </span>
+          <span class="user-details">
+            <strong>Usuario estándar</strong>
+            <small>usuario@inventario.com</small>
+          </span>
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+
+        <p class="test-note">
+          Selecciona un usuario para rellenar sus credenciales de demostración.
+        </p>
+      </section>
+
+      <footer class="footer-text">
+        Gestor de Inventario · Gestión sencilla y eficiente
+      </footer>
+
+    </main>
+  </div>
 </ion-content>

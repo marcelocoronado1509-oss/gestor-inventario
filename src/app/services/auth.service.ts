@@ -9,41 +9,50 @@ export interface UsuarioActual {
   rol: UserRole;
 }
 
+interface UsuarioPrueba extends UsuarioActual {
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private usuarioActualSubject =
+  private readonly usuarioActualSubject =
     new BehaviorSubject<UsuarioActual | null>(null);
 
-  usuarioActual$ = this.usuarioActualSubject.asObservable();
+  readonly usuarioActual$ = this.usuarioActualSubject.asObservable();
 
-  private usuarios = [
+  private readonly usuarios: UsuarioPrueba[] = [
     {
       email: 'admin@inventario.com',
       password: 'Admin123!',
-      rol: 'admin' as UserRole
+      rol: 'admin'
     },
     {
       email: 'usuario@inventario.com',
       password: 'Usuario123!',
-      rol: 'user' as UserRole
+      rol: 'user'
     }
   ];
 
-  // Compatible con el método que utiliza tu página de login.
+  get isLoggedIn(): boolean {
+    return this.usuarioActualSubject.value !== null;
+  }
+
   login(email: string, password: string): boolean {
     return this.iniciarSesion(email, password);
   }
 
-  // Inicio de sesión.
   iniciarSesion(email: string, password: string): boolean {
+    const emailNormalizado = email.trim().toLowerCase();
+
     const usuario = this.usuarios.find(
-      u => u.email === email && u.password === password
+      (item) =>
+        item.email.toLowerCase() === emailNormalizado &&
+        item.password === password
     );
 
     if (!usuario) {
-      this.usuarioActualSubject.next(null);
       return false;
     }
 
@@ -55,32 +64,22 @@ export class AuthService {
     return true;
   }
 
-  // Usuario que tiene la sesión iniciada.
   obtenerUsuarioActual(): UsuarioActual | null {
     return this.usuarioActualSubject.value;
   }
 
-  // Compatible con el guard existente.
-  get isLoggedIn(): boolean {
-    return this.usuarioActualSubject.value !== null;
-  }
-
-  // Comprueba el rol del usuario.
   hasRole(requiredRole: UserRole): boolean {
     return this.usuarioActualSubject.value?.rol === requiredRole;
   }
 
-  // Método alternativo para comprobar si es administrador.
   esAdmin(): boolean {
     return this.hasRole('admin');
   }
 
-  // Cerrar sesión.
   cerrarSesion(): void {
     this.usuarioActualSubject.next(null);
   }
 
-  // Alias por si algún componente usa este nombre.
   logout(): void {
     this.cerrarSesion();
   }

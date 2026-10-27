@@ -1,69 +1,112 @@
+
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonItem,
-  IonInput,
-  IonText,
-  IonButton
-} from '@ionic/angular';
-import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+
+import {
+  IonButton,
+  IonContent,
+  IonInput,
+  IonSpinner,
+  IonIcon
+} from '@ionic/angular';
+
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  
-imports: [ CommonModule, FormsModule,IonHeader,IonToolbar, IonTitle, IonContent, IonItem,IonInput, IonText,IonButton],
-
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonButton,
+    IonContent,
+    IonInput,
+    IonSpinner,
+    IonIcon
+  ]
 })
 export class LoginPage {
   email = '';
   password = '';
-  error = '';
-  loading = false;
+  mensaje = '';
+  cargando = false;
 
   constructor(
-    private auth: AuthService,
-    private router: Router
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {}
 
-  async submit(): Promise<void> {
-    this.error = '';
+  usarUsuarioPrueba(tipo: 'admin' | 'user'): void {
+    this.mensaje = '';
 
-    if (!this.email.trim() || !this.password) {
-      this.error = 'Introduce el correo y la contraseña.';
+    if (tipo === 'admin') {
+      this.email = 'admin@inventario.com';
+      this.password = 'Admin123!';
+    } else {
+      this.email = 'usuario@inventario.com';
+      this.password = 'Usuario123!';
+    }
+  }
+
+  async iniciarSesion(): Promise<void> {
+    if (this.cargando) {
       return;
     }
 
-    this.loading = true;
+    this.mensaje = '';
+
+    if (!this.email.trim() || !this.password) {
+      this.mensaje = 'Introduce tu correo y contraseña.';
+      return;
+    }
+
+    this.cargando = true;
 
     try {
-      const success = this.auth.login(
-        this.email,
+      console.log('1. Comprobando credenciales...');
+
+      const accesoCorrecto = this.authService.login(
+        this.email.trim(),
         this.password
       );
 
-      if (!success) {
-        this.error = 'Correo o contraseña incorrectos.';
+      if (!accesoCorrecto) {
+        this.mensaje = 'Correo o contraseña incorrectos.';
         return;
       }
 
-      const destination = this.auth.hasRole('admin')
-        ? '/dashboard'
-        : '/productos';
+      console.log('2. Credenciales correctas.');
 
-      await this.router.navigateByUrl(destination);
+      const usuario = this.authService.obtenerUsuarioActual();
+
+      if (!usuario) {
+        this.mensaje = 'No se ha podido recuperar el usuario.';
+        return;
+      }
+
+      const destino =
+        usuario.rol === 'admin' ? '/dashboard' : '/productos';
+
+      console.log('3. Navegando a:', destino);
+
+      const navegacionCorrecta =
+        await this.router.navigateByUrl(destino);
+
+      if (!navegacionCorrecta) {
+        this.mensaje =
+          'El acceso se ha validado, pero no se ha podido abrir la página. Revisa las rutas y los permisos.';
+      }
+    } catch (error) {
+      console.error('Error durante el inicio de sesión:', error);
+      this.mensaje =
+        'No se ha podido iniciar sesión. Revisa la consola para ver el error.';
     } finally {
-      this.loading = false;
+      this.cargando = false;
+      console.log('4. Finalizado el intento de inicio de sesión.');
     }
   }
 }
-
