@@ -1,11 +1,9 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import {
-  AlertController
-} from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 
 import {
   IonContent,
@@ -19,10 +17,8 @@ import {
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonSelect,
   IonSelectOption,
-  IonSearchbar,
   IonSpinner,
   IonText
 } from '@ionic/angular';
@@ -54,15 +50,14 @@ import { AuthService } from '../../services/auth.service';
     IonButton,
     IonInput,
     IonItem,
-    IonLabel,
     IonSelect,
     IonSelectOption,
-    IonSearchbar,
     IonSpinner,
     IonText
   ]
 })
 export class ProductosPage implements OnInit {
+
   productos: Producto[] = [];
 
   cargando = false;
@@ -82,7 +77,8 @@ export class ProductosPage implements OnInit {
   constructor(
     private productosService: ProductosService,
     private authService: AuthService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -124,14 +120,24 @@ export class ProductosPage implements OnInit {
   async cargarProductos(): Promise<void> {
     this.cargando = true;
     this.mensaje = '';
+    this.changeDetector.detectChanges();
 
     try {
-      this.productos = await this.productosService.obtenerProductos();
+      console.log('Iniciando carga de productos...');
+
+      const datos = await this.productosService.obtenerProductos();
+
+      this.productos = [...datos];
+
+      console.log('Productos cargados:', this.productos.length);
+
     } catch (error) {
       console.error('Error al cargar productos:', error);
       this.mensaje = 'No se pudieron cargar los productos desde Supabase.';
+
     } finally {
       this.cargando = false;
+      this.changeDetector.detectChanges();
     }
   }
 
@@ -186,12 +192,14 @@ export class ProductosPage implements OnInit {
 
       this.cancelarEdicion();
       await this.cargarProductos();
+
     } catch (error) {
       console.error('Error al guardar producto:', error);
       this.mensaje =
         'No se pudo guardar el producto. Comprueba las políticas de Supabase.';
     } finally {
       this.cargando = false;
+      this.changeDetector.detectChanges();
     }
   }
 
@@ -257,12 +265,14 @@ export class ProductosPage implements OnInit {
       await this.productosService.eliminarProducto(id);
       this.mensaje = 'Producto eliminado correctamente.';
       await this.cargarProductos();
+
     } catch (error) {
       console.error('Error al eliminar producto:', error);
       this.mensaje =
         'No se pudo eliminar el producto. Comprueba las políticas de Supabase.';
     } finally {
       this.cargando = false;
+      this.changeDetector.detectChanges();
     }
   }
 }

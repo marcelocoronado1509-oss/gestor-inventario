@@ -92,7 +92,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Mensajes accesibles -->
+    <!-- Mensajes -->
     <ion-text
       *ngIf="mensaje"
       [color]="mensaje.includes('No tienes permisos') || mensaje.includes('Revisa') ? 'danger' : 'success'"
@@ -101,7 +101,7 @@
       <p>{{ mensaje }}</p>
     </ion-text>
 
-    <!-- Aviso de permisos -->
+    <!-- Aviso para usuarios normales -->
     <ion-card *ngIf="!esAdmin">
       <ion-card-content>
         Estás en modo consulta. Puedes ver, buscar y filtrar productos,
@@ -139,6 +139,11 @@
           name="categoriaFiltro"
           interface="popover"
           placeholder="Selecciona una categoría">
+
+          <ion-select-option value="Todas">
+            Todas
+          </ion-select-option>
+
           <ion-select-option
             *ngFor="let categoria of categorias"
             [value]="categoria">
@@ -147,12 +152,20 @@
         </ion-select>
       </ion-item>
 
-      <ion-card *ngIf="productosFiltrados.length === 0">
+      <!-- Indicador de carga -->
+      <div *ngIf="cargando" class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+        <p>Cargando productos...</p>
+      </div>
+
+      <!-- Mensaje cuando no hay productos -->
+      <ion-card *ngIf="!cargando && productosFiltrados.length === 0">
         <ion-card-content>
           No se han encontrado productos con esos criterios.
         </ion-card-content>
       </ion-card>
 
+      <!-- Listado visible para administradores y usuarios -->
       <ion-card *ngFor="let producto of productosFiltrados">
         <ion-card-header>
           <ion-card-title>
@@ -182,7 +195,7 @@
             <p><strong>Stock bajo</strong></p>
           </ion-text>
 
-          <!-- Acciones visibles solo para administradores -->
+          <!-- Acciones exclusivas del administrador -->
           <div class="acciones-producto" *ngIf="esAdmin">
             <ion-button
               size="small"
@@ -206,3 +219,5 @@
     </section>
   </main>
 </ion-content>
+
+

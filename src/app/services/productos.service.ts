@@ -19,10 +19,29 @@ export type NuevoProducto = Omit<Producto, 'id' | 'created_at'>;
 export class ProductosService {
 
   async obtenerProductos(): Promise<Producto[]> {
+
+    // Comprobar la sesión del usuario
+    const { data: sesion, error: errorSesion } =
+      await supabase.auth.getSession();
+
+    console.log('Usuario autenticado:', sesion.session?.user?.email);
+    console.log(
+      'Rol del usuario:',
+      sesion.session?.user?.user_metadata?.['rol']
+    );
+
+    if (errorSesion) {
+      console.error('Error al comprobar la sesión:', errorSesion);
+    }
+
+    // Consultar los productos
     const { data, error } = await supabase
       .from('productos')
       .select('*')
       .order('id', { ascending: true });
+
+    console.log('Productos recibidos:', data);
+    console.log('Error de Supabase:', error);
 
     if (error) {
       console.error('Error al obtener productos:', error.message);

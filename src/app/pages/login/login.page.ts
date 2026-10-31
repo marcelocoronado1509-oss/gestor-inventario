@@ -60,53 +60,43 @@ export class LoginPage {
     this.mensaje = '';
 
     if (!this.email.trim() || !this.password) {
-      this.mensaje = 'Introduce tu correo y contraseña.';
+      this.mensaje =
+        'Introduce tu correo electrónico y contraseña.';
       return;
     }
 
     this.cargando = true;
 
     try {
-      console.log('1. Comprobando credenciales...');
-
-      const accesoCorrecto = this.authService.login(
-        this.email.trim(),
+      const resultado = await this.authService.login(
+        this.email,
         this.password
       );
 
-      if (!accesoCorrecto) {
-        this.mensaje = 'Correo o contraseña incorrectos.';
+      if (!resultado.ok) {
+        this.mensaje =
+          resultado.error ?? 'No se ha podido iniciar sesión.';
         return;
       }
-
-      console.log('2. Credenciales correctas.');
 
       const usuario = this.authService.obtenerUsuarioActual();
 
-      if (!usuario) {
-        this.mensaje = 'No se ha podido recuperar el usuario.';
-        return;
-      }
-
       const destino =
-        usuario.rol === 'admin' ? '/dashboard' : '/productos';
-
-      console.log('3. Navegando a:', destino);
+        usuario?.rol === 'admin' ? '/dashboard' : '/productos';
 
       const navegacionCorrecta =
         await this.router.navigateByUrl(destino);
 
       if (!navegacionCorrecta) {
         this.mensaje =
-          'El acceso se ha validado, pero no se ha podido abrir la página. Revisa las rutas y los permisos.';
+          'La sesión se ha iniciado, pero no se ha podido abrir la página. Revisa las rutas.';
       }
     } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
+      console.error('Error al iniciar sesión:', error);
       this.mensaje =
-        'No se ha podido iniciar sesión. Revisa la consola para ver el error.';
+        'Ha ocurrido un error al iniciar sesión.';
     } finally {
       this.cargando = false;
-      console.log('4. Finalizado el intento de inicio de sesión.');
     }
   }
 }

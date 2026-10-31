@@ -10,6 +10,14 @@
     <h1>Resumen del inventario</h1>
     <p>Consulta el estado general de tus productos.</p>
 
+    <p *ngIf="cargando" role="status">
+      Cargando información del inventario...
+    </p>
+
+    <p *ngIf="mensaje" class="mensaje-error" role="alert">
+      {{ mensaje }}
+    </p>
+
     <section class="resumen" aria-label="Resumen del inventario">
       <ion-card>
         <ion-card-header>
@@ -30,6 +38,16 @@
           <p class="numero">{{ totalUnidades }}</p>
         </ion-card-content>
       </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Valor del inventario</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p class="numero">{{ formatearMoneda(valorInventario) }}</p>
+        </ion-card-content>
+      </ion-card>
     </section>
 
     <ion-card>
@@ -38,8 +56,9 @@
       </ion-card-header>
 
       <ion-card-content>
-        <p *ngIf="categoriasLabels.length === 0">
-          No hay productos para representar en el gráfico.
+        <p *ngIf="!cargando && categoriasLabels.length === 0">
+          No hay productos con unidades para representar en el gráfico.
+          Añade productos desde la sección de gestión.
         </p>
 
         <div
@@ -61,7 +80,10 @@
                   '#eb445a',
                   '#92949c',
                   '#5260ff',
-                  '#2fdf75'
+                  '#2fdf75',
+                  '#ff8a65',
+                  '#ab47bc',
+                  '#26a69a'
                 ],
                 hoverOffset: 8,
                 borderWidth: 2,
@@ -70,7 +92,7 @@
             }"
             [options]="doughnutChartOptions"
             role="img"
-            aria-label="Gráfico circular tipo dona que muestra las unidades de inventario por categoría">
+            aria-label="Gráfico circular de unidades de inventario por categoría">
           </canvas>
         </div>
       </ion-card-content>
@@ -82,7 +104,7 @@
       </ion-card-header>
 
       <ion-card-content>
-        <p *ngIf="productos.length === 0">
+        <p *ngIf="!cargando && productos.length === 0">
           Todavía no hay productos registrados.
         </p>
 
@@ -92,7 +114,7 @@
           </ion-card-header>
 
           <ion-card-content>
-            <p>Categoría: {{ producto.categoria }}</p>
+            <p>Categoría: {{ producto.categoria || 'Sin categoría' }}</p>
             <p>Unidades: {{ producto.cantidad }}</p>
             <p>
               Precio:

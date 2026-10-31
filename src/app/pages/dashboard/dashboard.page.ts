@@ -16,7 +16,7 @@ import {
 } from '@ionic/angular';
 
 import { BaseChartDirective } from 'ng2-charts';
-import { Chart, registerables } from 'chart.js';
+import { Chart, registerables, ChartConfiguration } from 'chart.js';
 
 import {
   ProductosService,
@@ -56,21 +56,30 @@ export class DashboardPage implements OnInit {
 
   doughnutChartType: 'doughnut' = 'doughnut';
 
-  doughnutChartOptions = {
+  doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom' as const
+        display: true,
+        position: 'bottom'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const valor = Number(context.raw ?? 0);
+            return ` ${context.label}: ${valor} unidades`;
+          }
+        }
       }
     },
     cutout: '60%'
   };
 
   constructor(
-    private productosService: ProductosService,
-    private authService: AuthService,
-    private router: Router
+    private readonly productosService: ProductosService,
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +88,7 @@ export class DashboardPage implements OnInit {
 
   get totalUnidades(): number {
     return this.productos.reduce(
-      (total, producto) => total + producto.cantidad,
+      (total, producto) => total + Number(producto.cantidad || 0),
       0
     );
   }
@@ -87,7 +96,9 @@ export class DashboardPage implements OnInit {
   get valorInventario(): number {
     return this.productos.reduce(
       (total, producto) =>
-        total + producto.cantidad * producto.precio,
+        total +
+        Number(producto.cantidad || 0) *
+        Number(producto.precio || 0),
       0
     );
   }
@@ -97,13 +108,26 @@ export class DashboardPage implements OnInit {
     this.mensaje = '';
 
     try {
-      this.productos = await this.productosService.obtenerProductos();
+      const productos =
+        await this.productosService.obtenerProductos();
+
+      this.productos = productos ?? [];
       this.actualizarGrafico();
+
+      console.log(
+        'Productos cargados para el dashboard:',
+        this.productos.length
+      );
+      console.log('Categorías del gráfico:', this.categoriasLabels);
+      console.log('Datos del gráfico:', this.categoriasDatos);
     } catch (error) {
       console.error('Error al cargar productos:', error);
+
       this.productos = [];
-      this.mensaje = 'No se pudieron cargar los productos desde Supabase.';
       this.actualizarGrafico();
+
+      this.mensaje =
+        'No se pudieron cargar los productos desde Supabase.';
     } finally {
       this.cargando = false;
     }
@@ -113,11 +137,14 @@ export class DashboardPage implements OnInit {
     const cantidades = new Map<string, number>();
 
     for (const producto of this.productos) {
-      const categoria = producto.categoria || 'Sin categoría';
+      const categoria =
+        String(producto.categoria || '').trim() || 'Sin categoría';
+
+      const cantidad = Number(producto.cantidad) || 0;
 
       cantidades.set(
         categoria,
-        (cantidades.get(categoria) ?? 0) + producto.cantidad
+        (cantidades.get(categoria) ?? 0) + cantidad
       );
     }
 
@@ -136,8 +163,8 @@ export class DashboardPage implements OnInit {
     void this.router.navigate(['/productos']);
   }
 
-  cerrarSesion(): void {
-    this.authService.cerrarSesion();
-    void this.router.navigate(['/login']);
+  async cerrarSesion(): Promise<void> {
+    await this.authService.cerrarSesion();
+    await this.router.navigateByUrl('/login');
   }
 }
