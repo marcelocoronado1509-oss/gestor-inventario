@@ -1,5 +1,10 @@
 
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -16,7 +21,11 @@ import {
 } from '@ionic/angular';
 
 import { BaseChartDirective } from 'ng2-charts';
-import { Chart, registerables, ChartConfiguration } from 'chart.js';
+import {
+  Chart,
+  registerables,
+  ChartConfiguration
+} from 'chart.js';
 
 import {
   ProductosService,
@@ -47,6 +56,7 @@ Chart.register(...registerables);
   ]
 })
 export class DashboardPage implements OnInit {
+
   productos: Producto[] = [];
   cargando = false;
   mensaje = '';
@@ -79,7 +89,8 @@ export class DashboardPage implements OnInit {
   constructor(
     private readonly productosService: ProductosService,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -88,7 +99,8 @@ export class DashboardPage implements OnInit {
 
   get totalUnidades(): number {
     return this.productos.reduce(
-      (total, producto) => total + Number(producto.cantidad || 0),
+      (total, producto) =>
+        total + Number(producto.cantidad || 0),
       0
     );
   }
@@ -107,19 +119,31 @@ export class DashboardPage implements OnInit {
     this.cargando = true;
     this.mensaje = '';
 
+    this.changeDetector.detectChanges();
+
     try {
       const productos =
         await this.productosService.obtenerProductos();
 
-      this.productos = productos ?? [];
+      this.productos = [...(productos ?? [])];
+
       this.actualizarGrafico();
 
       console.log(
         'Productos cargados para el dashboard:',
         this.productos.length
       );
-      console.log('Categorías del gráfico:', this.categoriasLabels);
-      console.log('Datos del gráfico:', this.categoriasDatos);
+
+      console.log(
+        'Categorías del gráfico:',
+        this.categoriasLabels
+      );
+
+      console.log(
+        'Datos del gráfico:',
+        this.categoriasDatos
+      );
+
     } catch (error) {
       console.error('Error al cargar productos:', error);
 
@@ -128,8 +152,11 @@ export class DashboardPage implements OnInit {
 
       this.mensaje =
         'No se pudieron cargar los productos desde Supabase.';
+
     } finally {
       this.cargando = false;
+
+      this.changeDetector.detectChanges();
     }
   }
 

@@ -19,7 +19,8 @@ import { addIcons } from 'ionicons';
 import {
   shieldCheckmarkOutline,
   chevronForwardOutline,
-  personOutline
+  personOutline,
+  cubeOutline
 } from 'ionicons/icons';
 
 import { routes } from './app/app.routes';
@@ -29,7 +30,8 @@ import { AppComponent } from './app/app.component';
 addIcons({
   'shield-checkmark-outline': shieldCheckmarkOutline,
   'chevron-forward-outline': chevronForwardOutline,
-  'person-outline': personOutline
+  'person-outline': personOutline,
+  'cube-outline': cubeOutline
 });
 
 bootstrapApplication(AppComponent, {
